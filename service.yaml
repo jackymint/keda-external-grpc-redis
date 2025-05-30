@@ -10,8 +10,8 @@ spec:
       name: default
       port: 50051
       targetPort: 50051
-    # - protocol: TCP
-    #   name: internal
-    #   port: 3000
-    #   targetPort: 3000
+    - protocol: TCP
+      name: internal
+      port: 3000
+      targetPort: 3000
   type: ClusterIP

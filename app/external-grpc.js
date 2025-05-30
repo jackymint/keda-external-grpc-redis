@@ -1,6 +1,8 @@
 const grpc = require("@grpc/grpc-js");
 const protoLoader = require("@grpc/proto-loader");
 const redis = require("redis");
+const express = require("express");
+const app = express();
 
 const PROTO_PATH = __dirname + "/external.proto";
 
@@ -54,7 +56,7 @@ async function isActive(call, callback) {
 
       await client.set(QUEUE_LOCK_KEY, "1", {
         NX: true,
-        EX: 60,
+        EX: 30,
       });
       result = true;
     }
@@ -72,6 +74,7 @@ function streamIsActive(call) {
 async function getMetricSpec(call, callback) {
   try {
     console.log("call getMetricSpec");
+    await randomDelay(500, 2000);
 
     const resp = {
       metric_specs: [
@@ -88,6 +91,7 @@ async function getMetricSpec(call, callback) {
 }
 async function getMetrics(call, callback) {
   console.log("getMetrics");
+  await randomDelay(500, 2000);
 
   const locked = await client.get(QUEUE_LOCK_KEY);
   metricValue = locked ? 1 : 0;
@@ -96,6 +100,21 @@ async function getMetrics(call, callback) {
     metric_values: [{ metric_name: "lock-metric", metric_value: metricValue }],
   });
 }
+
+app.post("/unlock", async (req, res) => {
+  try {
+    const deleted = await client.del(QUEUE_LOCK_KEY);
+    console.log(`Deleted ${deleted} key(s) ${QUEUE_LOCK_KEY}`);
+    res.json({
+      success: true,
+      deletedKeys: deleted,
+      message: `Deleted ${deleted} key(s) for ${QUEUE_LOCK_KEY}`,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 function main() {
   const server = new grpc.Server();
@@ -119,6 +138,12 @@ function main() {
       server.start();
     },
   );
+
+  // start express server on different port
+  const httpPort = process.env.HTTP_PORT || 3000;
+  app.listen(httpPort, () => {
+    console.log(`Express HTTP server running on port ${httpPort}`);
+  });
 }
 
 main();

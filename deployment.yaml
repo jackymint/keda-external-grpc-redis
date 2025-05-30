@@ -17,7 +17,7 @@ spec:
           image: redis-grpc-scaler
           ports:
             - containerPort: 50051
-            # - containerPort: 3000
+            - containerPort: 3000
 
           envFrom:
             - secretRef:
