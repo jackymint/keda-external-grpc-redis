@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-grpc-scaler-svc
+spec:
+  selector:
+    app: redis-grpc-scaler
+  ports:
+    - protocol: TCP
+      name: default
+      port: 50051
+      targetPort: 50051
+    # - protocol: TCP
+    #   name: internal
+    #   port: 3000
+    #   targetPort: 3000
+  type: ClusterIP

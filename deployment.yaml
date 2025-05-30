@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-grpc-scaler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-grpc-scaler
+  template:
+    metadata:
+      labels:
+        app: redis-grpc-scaler
+    spec:
+      containers:
+        - name: scaler
+          image: redis-grpc-scaler
+          ports:
+            - containerPort: 50051
+            # - containerPort: 3000
+
+          envFrom:
+            - secretRef:
+                name: redis

@@ -1,0 +1,21 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: app
+
+build:
+  local:
+    push: false
+    useBuildkit: true
+    tryImportMissing: false
+    concurrency: 1
+
+  artifacts:
+    - image: redis-grpc-scaler
+      docker:
+        dockerfile: app/Dockerfile
+
+manifests:
+  kustomize:
+    paths:
+      - .
